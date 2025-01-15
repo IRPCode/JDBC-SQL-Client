@@ -1,9 +1,12 @@
 package com.irpcode;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Scanner;
+
+import javax.swing.UnsupportedLookAndFeelException;
 
 //make sure user inputs are parameterized to prevent SQL injection
 public class QueryMaker {
@@ -13,8 +16,11 @@ public class QueryMaker {
     static String DB_URL = BASE_URL + CHOSEN_DB;
     static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) {
-        getUserInfo();
+    public static void main(String[] args) throws IOException, InstantiationException, UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InterruptedException {
+
+        //getUserInfo();
+        LoginPanel.loginDBPanel();
+
     }
 
     public static void getUserInfo() {
@@ -138,7 +144,7 @@ public class QueryMaker {
             case 9 -> {
                 queryType = 3;
                 query = """
-                        CREATE DATABASE supplierDB; 
+                        DELETE DATABASE supplierDB; 
                          """ //
                         //
                         ; //TODO: Make this flexible depending on input
@@ -158,9 +164,9 @@ public class QueryMaker {
 
     }
 
-    public static void printQueryResults(ResultSet results, ResultSetMetaData metaData, int resultsUpdated, boolean resultsExecuted) throws SQLException {
+    public static void printQueryResults(ResultSet results, ResultSetMetaData metaData, int resultsUpdated, boolean resultsExecuted) throws SQLException, IOException, InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
 
-        if (metaData != null) {
+        /*if (metaData != null) {
             int colCount = metaData.getColumnCount();
             for (int i = 1; i <= colCount; i++) {
                 System.out.println(metaData.getColumnName(i) + "\t");
@@ -168,9 +174,12 @@ public class QueryMaker {
             System.out.println();
             while (results.next()) { // Print rows
                 for (int i = 1; i <= colCount; i++) {
+                    
                     System.out.println(results.getString(i) + "\t");
                 }
             }
+
+            
 
             if (resultsUpdated > 0) {
                 System.out.println("Entries updated: " + resultsUpdated);
@@ -180,6 +189,9 @@ public class QueryMaker {
                 System.out.println("Entries executed: " + resultsExecuted);
             }
 
-        }
+            
+
+        }*/
+        UIMaker.setupUI(results);
     }
 }

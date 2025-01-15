@@ -11,6 +11,8 @@ import java.sql.Statement;
 //String sql = "SELECT * FROM users WHERE username = ? AND role = ?";
 //Make sure inputs are treated as data and not as SQL queries.
 //Make sure to use PreparedStatement to prevent SQL injection.
+//Read this: https://stackoverflow.com/questions/8918157/how-do-i-convert-a-resultset-in-a-list-of-hashtable
+//Try saving entries from ResultSet in a HashMap using ResultSet.next() to see what it does
 
 public class SQLQuery {
 
