@@ -2,9 +2,11 @@ package com.irpcode;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -18,13 +20,18 @@ import javax.swing.border.EmptyBorder;
 
 public abstract class LoginPanel implements ActionListener {
 
+    private static JFrame loginPanel;
     private static JButton loginButton;
     private static JButton exitButton;
+    private static JTextField usernameField;
+    private static JTextField passwordField;
+    private static JTextField DBField;
+    static String BASE_URL = "jdbc:mysql://localhost:3306/";
 
     public static void loginDBPanel() throws InstantiationException, ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException, InterruptedException { //gleeble glorp borp gotta make da class swapper pannel 
         //don't forget to make a log-in panel :O
 
-        JFrame loginPanel = new JFrame("Log in to your database");
+        loginPanel = new JFrame("Log in to your database");
         UIMaker.frameStyle(loginPanel);
         loginPanel.setSize(500, 200);
         loginPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,10 +42,13 @@ public abstract class LoginPanel implements ActionListener {
         GroupLayout groupLayout = new GroupLayout(panel);
 
         JLabel usernameLabel = new JLabel("Enter your username:");
-        JTextField usernameField = new JTextField("root");
+        usernameField = new JTextField("root");
 
         JLabel passwordLabel = new JLabel("Enter your password:");
-        JTextField passwordField = new JTextField("pass");
+        passwordField = new JTextField("pass");
+
+        JLabel DBLabel = new JLabel("Enter your Database:");
+        DBField = new JTextField("users");
 
         JSeparator separator = new JSeparator();
 
@@ -74,19 +84,38 @@ public abstract class LoginPanel implements ActionListener {
                 .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
         );
 
+        exitButton.addActionListener(e -> System.exit(0));
+        loginButton.addActionListener(e -> {
+            try {
+                loginChecker();
+            } catch (SQLException ex) {
+            }
+        });
+
         loginPanel.setVisible(true);
 
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // Check which button was clicked
-        if (e.getSource() == loginButton) {
-            System.out.println("Login button clicked!");
-            // Add login logic here (e.g., validate credentials)
-        } else if (e.getSource() == exitButton) {
-            System.out.println("Exit button clicked!");
-            System.exit(0); // Exit the application
+    public static void loginChecker() throws SQLException {
+
+        String USER = usernameField.getText();
+        String PASS = passwordField.getText();
+        String DB_URL = BASE_URL + DBField.getText();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            System.out.println("Success");
+            loginPanel.dispose();
+            UIMaker.setupUI(null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (e.getMessage().contains("Access denied for user")) {
+                loginButton.setText("Access Denied");
+            } else {
+                loginButton.setText("Server Communication Failure");
+            }
+
         }
+
     }
 }

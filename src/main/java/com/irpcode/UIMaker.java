@@ -28,14 +28,16 @@ public abstract class UIMaker extends JFrame implements ActionListener {
     static JRadioButton updateButton, insertButton, deleteButton, createTableButton, alterTableButton, dropTableButton, createDBButton, deleteDBButton;
     static JButton selectStatementButton, runQueryButton, changeDBButton;
     static JFrame frame;
+    
 
     public static void setupUI(ResultSet results) throws IOException, InstantiationException, UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, SQLException {
 
         String foundType = "";
         frame = new JFrame("JDBC SQL Client");
         frameStyle(frame);
-        frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        //frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+        frame.setSize(500,500);
+        //frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         ButtonGroup DBBehaivor = new ButtonGroup();
         DBBehaivor.add(updateButton);
