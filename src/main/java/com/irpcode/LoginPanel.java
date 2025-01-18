@@ -48,7 +48,7 @@ public abstract class LoginPanel implements ActionListener {
         passwordField = new JTextField("pass");
 
         JLabel DBLabel = new JLabel("Enter your Database:");
-        DBField = new JTextField("users");
+        DBField = new JTextField("users"); //TODO: Add this later
 
         JSeparator separator = new JSeparator();
 
