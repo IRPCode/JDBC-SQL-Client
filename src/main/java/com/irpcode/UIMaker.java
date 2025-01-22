@@ -30,7 +30,7 @@ import com.formdev.flatlaf.FlatLaf;
 public abstract class UIMaker extends JFrame implements ActionListener {
 
     static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    static private JButton exitButton, openPanel;
+    private static JButton exitButton, openPanel;
     static JFrame frame;
 
     public static void setupUI(ResultSet results) throws IOException, InstantiationException,
@@ -69,19 +69,22 @@ public abstract class UIMaker extends JFrame implements ActionListener {
                 .addComponent(topLine, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
         exitLayout.setVerticalGroup(exitLayout.createSequentialGroup()
-
                 .addGroup(exitLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(appLabel)
-                        .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, 15,
-                                GroupLayout.PREFERRED_SIZE))
+                        .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, 15,GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED) // Space between components
-                .addComponent(topLine, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE));
+                .addComponent(topLine, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+
         String[] DBActionsArray = { "Update Data", "Insert Data", "Delete Data", "Create Table",
-                "Edit Table", "Delete Table", "Create Database", "Delete Database", "Change Database" };
+                "Edit Table", "Delete Table", "Change Database", "Create Database", "Delete Database" };
         JList<String> DBActionsList = new JList<>(DBActionsArray);
         openPanel = new JButton("Open Query Options");
-        openPanel.addActionListener(e -> openPanelOptionsChooser(DBActionsList));
+        openPanel.addActionListener(e -> {
+            try {
+                openPanelOptionsChooser(DBActionsList);
+            } catch (IOException | InstantiationException | ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            }
+        });
 
         JPanel rightPanel = new JPanel();
         JPanel leftPanel = new JPanel();
@@ -109,7 +112,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
             UIManager.setLookAndFeel(new FlatDarculaLaf());
             frame.setUndecorated(true);
         } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
+            DBActionOptions.crashError(null);
         }
 
         Image icon = null;
@@ -127,10 +130,10 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         }
 
         frame.setIconImage(icon);
-        System.out.println(icon);
+        //System.out.println(icon);
     }
 
-    public static void openPanelOptionsChooser(@SuppressWarnings("rawtypes") JList DBActionsList) {
+    public static void openPanelOptionsChooser(@SuppressWarnings("rawtypes") JList DBActionsList) throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
         int selectedAction = DBActionsList.getSelectedIndex();
         System.out.println(selectedAction);
         if (selectedAction > -1){

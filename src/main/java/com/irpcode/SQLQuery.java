@@ -1,10 +1,13 @@
 package com.irpcode;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+
+import javax.swing.UnsupportedLookAndFeelException;
 
 //String sql = "SELECT * FROM users WHERE username = ?";
 //String sql = "INSERT INTO users (username, role) VALUES (?, ?)";
@@ -18,7 +21,8 @@ public class SQLQuery {
 
     public static String[] returnedData;
 
-    public static void statementMaker(String DB_URL, String USER, String PASS, String query, int queryType) {
+    @SuppressWarnings("CallToPrintStackTrace")
+    public static void statementMaker(String DB_URL, String USER, String PASS, String query, int queryType) throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS); Statement statement = conn.createStatement();) {
             ResultSet results = null;
             int resultsUpdated = 0;
@@ -45,6 +49,10 @@ public class SQLQuery {
             QueryMaker.printQueryResults(results, metaData, resultsUpdated, resultsExecuted);
         } catch (Exception e) {
             e.printStackTrace();
+            if (e.getMessage().contains("database doesn't exist")){
+                String errorMessage = "Database doesn't exist";
+                DBActionOptions.crashError(errorMessage);
+            }
         }
     }
 

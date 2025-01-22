@@ -15,15 +15,17 @@ public class QueryMaker {
     static String CHOSEN_DB = "users";
     static String DB_URL = BASE_URL + CHOSEN_DB;
     static Scanner scanner = new Scanner(System.in);
+    static boolean DBFlag = false;
 
     public static void main(String[] args) throws IOException, InstantiationException, UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InterruptedException {
 
         //getUserInfo();
-        LoginPanel.loginDBPanel();
+
+        LoginPanel.loginDBPanel(DBFlag, null, -1);
         //DBActionOptions.optionPanel(0);
     }
 
-    public static void getUserInfo() {
+    public static void getUserInfo() throws InstantiationException, ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException {
         String USER = "root";
         String PASS = "pass";
         int yn = 1;
@@ -48,7 +50,7 @@ public class QueryMaker {
 
     }
 
-    public static void getQuery(String USER, String PASS, String DB_URL) {
+    public static void getQuery(String USER, String PASS, String DB_URL) throws InstantiationException, ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException {
         //TODO: Get user information from UI to send query
         System.out.println("Enter a number between 1-10 to choose a query type: ");
         int type = scanner.nextInt();
@@ -141,10 +143,10 @@ public class QueryMaker {
                 SQLQuery.statementMaker(DB_URL, USER, PASS, query, queryType);
             }
 
-            case 9 -> {
+            case 9 -> { //done
                 queryType = 3;
                 query = """
-                        DELETE DATABASE supplierDB; 
+                        DROP DATABASE supplierDB; 
                          """ //
                         //
                         ; //TODO: Make this flexible depending on input
