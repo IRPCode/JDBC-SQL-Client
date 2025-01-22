@@ -145,6 +145,7 @@ public abstract class LoginPanel implements ActionListener {
                 System.out.println(query + queryType);
                 DBFlagSetter();
             } else {
+                System.out.println("!");
                 UIMaker.setupUI(null);
             }
 

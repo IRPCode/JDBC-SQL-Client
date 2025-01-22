@@ -46,7 +46,7 @@ public class SQLQuery {
                 }
             }
          
-            QueryMaker.printQueryResults(results, metaData, resultsUpdated, resultsExecuted);
+            //QueryMaker.printQueryResults(results, metaData, resultsUpdated, resultsExecuted);
         } catch (Exception e) {
             e.printStackTrace();
             if (e.getMessage().contains("database doesn't exist")){

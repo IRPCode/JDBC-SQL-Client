@@ -32,8 +32,8 @@ public class DBActionOptions {
             case 3 -> createTable();
             case 4 -> editTable();
             case 5 -> deleteTable();
-            case 6 -> createDatabase();
-            case 7 -> editDatabase();
+            case 6 -> changeDatabase();
+            case 7 -> createDatabase();
             case 8 -> deleteDatabase();
         }
     }
@@ -92,31 +92,33 @@ public class DBActionOptions {
         }
     }
 
-    public static void createDatabase() {
-        try {
-            baseOptionsPanel();
-        } catch (Exception e) {
-            optionsFrame.dispose();
-            System.out.println("Fatal Error");
-        }
+    public static void changeDatabase() throws IOException, InstantiationException, ClassNotFoundException,
+            IllegalAccessException, UnsupportedLookAndFeelException {
+
     }
 
-    public static void editDatabase() {
+    public static void createDatabase() throws IOException, InstantiationException, ClassNotFoundException,
+            IllegalAccessException, UnsupportedLookAndFeelException {
+        explanationString = "Make sure you are using a new DB name.";
+        explanationString2 = "Enter the database you wish to create:";
         try {
             baseOptionsPanel();
+            DBEditorSetup(explanationString, explanationString2, 2);
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
+            e.printStackTrace();
+            crashError(null);
         }
     }
 
     public static void deleteDatabase() throws IOException, InstantiationException, ClassNotFoundException,
             IllegalAccessException, UnsupportedLookAndFeelException {
         explanationString = "WARNING: THIS WILL DELETE YOUR DATABASE!";
-        explanationString2 = "Enter the Database you wish to delete:";
+        explanationString2 = "Enter the database you wish to delete:";
         try {
             baseOptionsPanel();
-            DBEditorSetup(explanationString, explanationString2, DBEditorType);
+            DBEditorSetup(explanationString, explanationString2, 3);
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
@@ -157,7 +159,7 @@ public class DBActionOptions {
         }
 
         errorFrame.setSize(250, 100);
-        
+
         errorButton.setPreferredSize(new Dimension(100, 25));
 
         Border border = BorderFactory.createLineBorder(Color.decode("#af1a1b"), 3);
@@ -212,8 +214,20 @@ public class DBActionOptions {
 
         verifyCredentials.addActionListener(e -> {
             try {
-                
-                if (!textField.getText().equals("")) {
+
+                if (!textField.getText().equals("") && type == 1){
+
+                }
+
+                else if (!textField.getText().equals("") && type == 2) {
+                    textFieldText = textField.getText();
+                    textFieldText = textField.getText();
+                    query = "CREATE DATABASE " + textFieldText + ";";
+                    queryType = 3;
+                    LoginPanel.loginDBPanel(DBFlag, query, queryType);
+                    optionsFrame.dispose();
+                    
+                } else if (!textField.getText().equals("") && type == 3) {
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
                     query = "DROP DATABASE " + textFieldText + ";";
@@ -221,11 +235,11 @@ public class DBActionOptions {
                     LoginPanel.loginDBPanel(DBFlag, query, queryType);
                     optionsFrame.dispose();
                 }
-                else{
+
+                else {
                     verifyCredentials.setText("Missing Text!");
                 }
 
-               
             } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
                     | UnsupportedLookAndFeelException | InterruptedException e1) {
                 e1.printStackTrace();
