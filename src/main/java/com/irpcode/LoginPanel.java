@@ -45,7 +45,7 @@ public abstract class LoginPanel implements ActionListener {
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         GroupLayout groupLayout = new GroupLayout(panel);
 
-        JLabel DBLabel = new JLabel("Enter your primary database:");
+        JLabel DBLabel = new JLabel();
         DBField = new JTextField("users");
 
         JLabel usernameLabel = new JLabel("Enter your username:");
@@ -63,6 +63,12 @@ public abstract class LoginPanel implements ActionListener {
             exitButton = new JButton("Cancel");
         } else {
             exitButton = new JButton("Exit");
+        }
+
+        if (DBFlag == true) {
+            DBLabel.setText("Re-enter your database:");
+        } else {
+            DBLabel.setText("Enter your primary database:");
         }
 
         exitButton.setPreferredSize(new Dimension(100, 20));
@@ -145,8 +151,8 @@ public abstract class LoginPanel implements ActionListener {
                 System.out.println(query + queryType);
                 DBFlagSetter();
             } else {
-                System.out.println("!");
                 UIMaker.setupUI(null);
+                DBActionOptions.credentialsSetter(DB_URL, USER, PASS);
             }
 
         } catch (Exception e) {
