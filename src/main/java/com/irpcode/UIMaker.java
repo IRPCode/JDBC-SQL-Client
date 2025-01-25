@@ -32,6 +32,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
     static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private static JButton exitButton, openPanel;
     static JFrame frame;
+  
 
     public static void setupUI(ResultSet results) throws IOException, InstantiationException,
             UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, SQLException {

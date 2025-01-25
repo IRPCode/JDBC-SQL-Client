@@ -31,6 +31,7 @@ public abstract class LoginPanel implements ActionListener {
     private static JTextField DBField;
     static String BASE_URL = "jdbc:mysql://localhost:3306/";
     private static boolean DBFlag = false;
+ 
 
     public static void loginDBPanel(boolean DBFlag, String query, int queryType) throws InstantiationException, ClassNotFoundException,
             IllegalAccessException, IOException, UnsupportedLookAndFeelException, InterruptedException {

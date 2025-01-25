@@ -3,6 +3,12 @@ package com.irpcode;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -26,6 +32,7 @@ public class DBActionOptions {
     private static int queryType, DBEditorType;
     private static String dataTypes[] = { "CHAR(255)", "VARCHAR(100)", "BINARY(1)", "VARBINARY(25)", "MEDIUMTEXT",
             "MEDIUMBLOB", "LONGTEXT", "LONGBLOB", "BIT(1)", "BOOL", "INT(255)", "DOUBLE(10,2)" };
+    private static String columnNames[] = new String[6];
 
     public static void optionPanel(int selectedAction) throws IOException, InstantiationException,
             ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
@@ -63,6 +70,8 @@ public class DBActionOptions {
     public static void deleteData() {
         try {
             baseOptionsPanel(500, 300);
+            dataEditorSetup("Enter the table you wish to interact with:",
+                    "Enter your condition to identify deletable entires:", 3, "Delete");
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
@@ -84,7 +93,8 @@ public class DBActionOptions {
         }
     }
 
-    public static void editTable() {
+    public static void editTable() { // Tell the user the app only supports 6 columns, and this is where to modify
+                                     // columns (prevent adding and dropping)
         try {
             baseOptionsPanel(500, 300);
         } catch (Exception e) {
@@ -216,6 +226,113 @@ public class DBActionOptions {
 
     }
 
+    public static void dataEditorSetup(String labelText, String labelText2, int type, String executeText) {
+        boolean DBFlag = true;
+        explanationLabel = new JLabel(labelText);
+        explanationLabel2 = new JLabel(labelText2);
+        JTextField textField = new JTextField();
+        JSeparator getColumnSeparator = new JSeparator();
+        buttonSeparator = new JSeparator();
+        buttonSeparator1 = new JSeparator();
+        JButton executeQueryButton = new JButton(executeText);
+        cancelButton = new JButton("Cancel");
+
+        cancelButton.addActionListener(e -> {
+            optionsFrame.dispose();
+        });
+
+        switch (type) {
+            case 3 -> {
+
+                JLabel condition = new JLabel("Enter the column to base your condition off of:");
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                JSeparator conditionSeperator = new JSeparator();
+                JComboBox columnBox = new JComboBox<>();
+                JButton getColumns = new JButton("Get Columns!");
+                JTextField enterTable = new JTextField();
+
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
+
+                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(explanationLabel)
+                        .addComponent(enterTable, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE)
+                        .addComponent(getColumns)
+                        .addComponent(getColumnSeparator)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(condition)
+                        .addComponent(buttonSeparator)
+                        .addComponent(textField)
+                        .addComponent(columnBox)
+                        .addComponent(conditionSeperator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+
+                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
+                        .addComponent(explanationLabel)
+                        .addComponent(enterTable)
+                        .addComponent(getColumns)
+                        .addComponent(getColumnSeparator)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(condition)
+                        .addComponent(buttonSeparator)
+                        .addComponent(columnBox)
+                        .addComponent(textField)
+                        .addComponent(conditionSeperator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+                optionsFrame.setLayout(optionsLayout);
+
+                getColumns.addActionListener(e -> {
+
+                    if (!enterTable.getText().isEmpty()) {
+                        try {
+                            columnsGetter(enterTable.getText());
+                        } catch (SQLException ex) {
+                        }
+                    }
+
+                    else{
+                        getColumns.setText("Enter table!");
+                    }
+
+                });
+
+                // send instructions to login panel
+                executeQueryButton.addActionListener(e -> {
+                    textFieldText = textField.getText();
+                    textFieldText = textField.getText();
+                    query = "DROP TABLE " + textFieldText + ";";
+                    queryType = 3;
+                    try {
+                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException
+                            | IOException | UnsupportedLookAndFeelException | InterruptedException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    optionsFrame.dispose();
+                    loginSetter();
+                });
+
+            }
+
+            case 2 -> {
+
+            }
+
+            case 1 -> {
+
+            }
+        }
+    }
+
     public static void tableEditorSetup(String labelText, String labelText2, int type, String executeText) {
         boolean DBFlag = true;
         explanationLabel = new JLabel(labelText);
@@ -256,7 +373,7 @@ public class DBActionOptions {
                         .addComponent(cancelButton));
                 optionsFrame.setLayout(optionsLayout);
 
-                //send instructions to login panel
+                // send instructions to login panel
                 executeQueryButton.addActionListener(e -> {
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
@@ -335,18 +452,18 @@ public class DBActionOptions {
 
                     String[] tableItems = new String[6];
 
-                    //Build the Query
+                    // Build the Query
                     query = "CREATE TABLE " + textField.getText() + "(";
-                    for (int i = 0; i < 6; i++){
+                    for (int i = 0; i < 6; i++) {
                         tableItems[i] = dataFields[i].getText() + " " + dataTypesBoxes[i].getSelectedItem().toString();
-                        if (i < 5){
+                        if (i < 5) {
                             tableItems[i] = tableItems[i] + ", ";
                         }
                         query = query + tableItems[i];
                     }
-                    query = query + ");"; 
+                    query = query + ");";
 
-                    //Send the query off
+                    // Send the query off
                     queryType = 3;
                     try {
                         LoginPanel.loginDBPanel(DBFlag, query, queryType);
@@ -450,5 +567,25 @@ public class DBActionOptions {
         DB_URL = database;
         USER = username;
         PASS = password;
+    }
+
+    public static String[] columnsGetter(String tableName) throws SQLException {
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                Statement statement = conn.createStatement();) {
+                DatabaseMetaData metaData = conn.getMetaData();
+                ResultSet columns = metaData.getColumns(null, null, tableName, null);
+                System.out.println(columns);
+
+                for (int i = 0; columns.next() && i < 6; i++) {
+                    columnNames[i] = columns.getString("COLUMN_NAME"); //TODO: push column names to your delete data method
+                    System.out.println(columnNames[i]);
+                }
+
+
+        } catch (Exception e) {
+
+        }
+        return dataTypes;
     }
 }
