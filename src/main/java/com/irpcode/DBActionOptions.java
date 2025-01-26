@@ -4,13 +4,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -32,7 +33,10 @@ public class DBActionOptions {
     private static int queryType, DBEditorType;
     private static String dataTypes[] = { "CHAR(255)", "VARCHAR(100)", "BINARY(1)", "VARBINARY(25)", "MEDIUMTEXT",
             "MEDIUMBLOB", "LONGTEXT", "LONGBLOB", "BIT(1)", "BOOL", "INT(255)", "DOUBLE(10,2)" };
+    private static String strInt[] = {"String", "Int"};
+    private static String comparisonTypes[] = {"=", "<", ">"};
     private static String columnNames[] = new String[6];
+    private static JButton getColumns;
 
     public static void optionPanel(int selectedAction) throws IOException, InstantiationException,
             ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
@@ -69,7 +73,7 @@ public class DBActionOptions {
 
     public static void deleteData() {
         try {
-            baseOptionsPanel(500, 300);
+            baseOptionsPanel(500, 500);
             dataEditorSetup("Enter the table you wish to interact with:",
                     "Enter your condition to identify deletable entires:", 3, "Delete");
         } catch (Exception e) {
@@ -230,6 +234,7 @@ public class DBActionOptions {
         boolean DBFlag = true;
         explanationLabel = new JLabel(labelText);
         explanationLabel2 = new JLabel(labelText2);
+
         JTextField textField = new JTextField();
         JSeparator getColumnSeparator = new JSeparator();
         buttonSeparator = new JSeparator();
@@ -245,10 +250,15 @@ public class DBActionOptions {
             case 3 -> {
 
                 JLabel condition = new JLabel("Enter the column to base your condition off of:");
+                JLabel stringOrInt = new JLabel("Is it a string or an integer?");
+                JLabel comparisonTypeLabel = new JLabel("Enter comparison type (use '=' for string):");
                 GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
                 JSeparator conditionSeperator = new JSeparator();
-                JComboBox columnBox = new JComboBox<>();
-                JButton getColumns = new JButton("Get Columns!");
+                JSeparator conditionSeparator2 = new JSeparator();
+                JComboBox<String> columnBox = new JComboBox<>(new String[0]);
+                JComboBox<String> strIntCB = new JComboBox<>(strInt);
+                JComboBox<String> comparisonTypesCB = new JComboBox<>(comparisonTypes);
+                getColumns = new JButton("Get Columns!");
                 JTextField enterTable = new JTextField();
 
                 optionsLayout.setAutoCreateGaps(true);
@@ -256,8 +266,8 @@ public class DBActionOptions {
 
                 optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                         .addComponent(explanationLabel)
-                        .addComponent(enterTable, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE)
+                        .addComponent(enterTable, GroupLayout.PREFERRED_SIZE, 300,
+                                GroupLayout.PREFERRED_SIZE)
                         .addComponent(getColumns)
                         .addComponent(getColumnSeparator)
                         .addComponent(explanationLabel2)
@@ -267,6 +277,11 @@ public class DBActionOptions {
                         .addComponent(buttonSeparator)
                         .addComponent(textField)
                         .addComponent(columnBox)
+                        .addComponent(conditionSeparator2)
+                        .addComponent(stringOrInt)
+                        .addComponent(strIntCB)
+                        .addComponent(comparisonTypeLabel)
+                        .addComponent(comparisonTypesCB)
                         .addComponent(conditionSeperator)
                         .addComponent(executeQueryButton)
                         .addComponent(cancelButton));
@@ -283,7 +298,13 @@ public class DBActionOptions {
                         .addComponent(condition)
                         .addComponent(buttonSeparator)
                         .addComponent(columnBox)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(textField)
+                        .addComponent(conditionSeparator2)
+                        .addComponent(stringOrInt)
+                        .addComponent(strIntCB)
+                        .addComponent(comparisonTypeLabel)
+                        .addComponent(comparisonTypesCB)
                         .addComponent(conditionSeperator)
                         .addComponent(executeQueryButton)
                         .addComponent(cancelButton));
@@ -293,12 +314,13 @@ public class DBActionOptions {
 
                     if (!enterTable.getText().isEmpty()) {
                         try {
-                            columnsGetter(enterTable.getText());
+                            columnBox.setModel(new DefaultComboBoxModel<>(columnsGetter(enterTable.getText())));
+                            optionsFrame.repaint();
                         } catch (SQLException ex) {
                         }
                     }
 
-                    else{
+                    else {
                         getColumns.setText("Enter table!");
                     }
 
@@ -308,7 +330,8 @@ public class DBActionOptions {
                 executeQueryButton.addActionListener(e -> {
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
-                    query = "DROP TABLE " + textFieldText + ";";
+                    query = "DELETE FROM " + enterTable.getText() + " WHERE " + columnBox.getSelectedItem().toString() + " " + comparisonTypesCB.getSelectedItem().toString() + " " + textField.getText() + ";";
+                    System.out.println(query);
                     queryType = 3;
                     try {
                         LoginPanel.loginDBPanel(DBFlag, query, queryType);
@@ -573,19 +596,17 @@ public class DBActionOptions {
         
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
                 Statement statement = conn.createStatement();) {
-                DatabaseMetaData metaData = conn.getMetaData();
-                ResultSet columns = metaData.getColumns(null, null, tableName, null);
-                System.out.println(columns);
-
-                for (int i = 0; columns.next() && i < 6; i++) {
-                    columnNames[i] = columns.getString("COLUMN_NAME"); //TODO: push column names to your delete data method
-                    System.out.println(columnNames[i]);
-                }
-
+            ResultSet getColQuery = statement.executeQuery("SELECT * FROM " + tableName + ";");
+            ResultSetMetaData metaData = getColQuery.getMetaData();
+            System.out.println(tableName);
+            for (int i = 1; i < 7; i++) {
+                columnNames[i-1] = metaData.getColumnName(i);
+                System.out.println(columnNames[i-1]);
+            }
 
         } catch (Exception e) {
 
         }
-        return dataTypes;
+        return columnNames;
     }
 }
