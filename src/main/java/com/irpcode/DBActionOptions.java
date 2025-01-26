@@ -2,6 +2,7 @@ package com.irpcode;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,9 +34,10 @@ public class DBActionOptions {
     private static int queryType, DBEditorType;
     private static String dataTypes[] = { "CHAR(255)", "VARCHAR(100)", "BINARY(1)", "VARBINARY(25)", "MEDIUMTEXT",
             "MEDIUMBLOB", "LONGTEXT", "LONGBLOB", "BIT(1)", "BOOL", "INT(255)", "DOUBLE(10,2)" };
-    private static String strInt[] = {"String", "Int"};
-    private static String comparisonTypes[] = {"=", "<", ">"};
+    private static String strInt[] = { "String", "Int" };
+    private static String comparisonTypes[] = { "=", "<", ">" };
     private static String columnNames[] = new String[6];
+    private static String columnNameTypes[] = new String[6];
     private static JButton getColumns;
 
     public static void optionPanel(int selectedAction) throws IOException, InstantiationException,
@@ -64,7 +66,9 @@ public class DBActionOptions {
 
     public static void insertData() {
         try {
-            baseOptionsPanel(500, 300);
+            baseOptionsPanel(500, 525);
+            dataEditorSetup("This section will allow you to insert info into a table",
+                    "Enter the table you wish to add an entry to:", 2, "Insert");
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
@@ -247,8 +251,134 @@ public class DBActionOptions {
         });
 
         switch (type) {
-            case 3 -> {
+            case 1 -> {
 
+            }
+
+            case 2 -> {
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
+
+                GroupLayout.ParallelGroup hGroup = optionsLayout.createParallelGroup(); // Horizontal layout
+                GroupLayout.SequentialGroup pGroup = optionsLayout.createSequentialGroup(); // Vertical layout
+
+                JLabel[] columnNameLabel = new JLabel[6];
+                JTextField[] dataFields = new JTextField[6];
+                JButton getColumns = new JButton("Get Columns!");
+
+                for (int i = 0; i < 6; i++) {
+                    columnNameLabel[i] = new JLabel("null - null:");
+                    dataFields[i] = new JTextField();
+                }
+
+                hGroup.addComponent(explanationLabel, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(explanationLabel2, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(textField, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(getColumns, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(buttonSeparator, GroupLayout.Alignment.CENTER);
+
+                for (int i = 0; i < 6; i++) {
+                    hGroup.addComponent(columnNameLabel[i], GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(dataFields[i], GroupLayout.Alignment.CENTER);
+
+                }
+
+                hGroup.addComponent(buttonSeparator1, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(executeQueryButton, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(cancelButton, GroupLayout.Alignment.CENTER);
+
+                pGroup.addComponent(explanationLabel);
+                pGroup.addComponent(explanationLabel2);
+                pGroup.addComponent(textField);
+                pGroup.addComponent(getColumns);
+                pGroup.addComponent(buttonSeparator);
+
+                for (int i = 0; i < 6; i++) {
+                    pGroup.addComponent(columnNameLabel[i]);
+                    pGroup.addComponent(dataFields[i]);
+                }
+
+                pGroup.addComponent(buttonSeparator1);
+                pGroup.addComponent(executeQueryButton);
+                pGroup.addComponent(cancelButton);
+
+                // Add the Parallel Groups to Sequential Groups for layout
+                optionsLayout.setHorizontalGroup(hGroup);
+                optionsLayout.setVerticalGroup(pGroup);
+
+                // Set the layout to the frame
+                optionsFrame.getContentPane().setLayout(optionsLayout);
+
+                getColumns.addActionListener((ActionEvent e) -> {
+
+                    try {
+                        columnsGetter(textField.getText());
+                    } catch (SQLException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+
+                    for (int i = 0; i < 6; i++) {
+                        columnNameLabel[i].setText(columnNameTypes[i] + " - " + columnNames[i] + ":"); // columnNames[i]
+                    }
+
+                    optionsFrame.repaint();
+
+                });
+
+                executeQueryButton.addActionListener(e -> {
+
+                    // Build the Query
+                    query = "INSERT INTO " + textField.getText() + " (";
+                    for (int i = 0; i < 6; i++) {
+
+                        if (i < 5) {
+                            columnNames[i] = columnNames[i] + ", ";
+                        }
+                        query = query + columnNames[i];
+                        if (i == 5) {
+                            query = query + ") VALUES (";
+                        }
+                    }
+
+                    for (int i = 0; i < 6; i++) {
+
+                        if (null == typeCheck(dataFields[i].getText())) {
+                            query = query + "null";
+                        }
+
+                        else if ("String".equals(typeCheck(dataFields[i].getText()))) {
+                            query = query + "\"" + dataFields[i].getText() + "\"";
+                        }
+
+                        else{
+                            query = query + dataFields[i].getText();
+                        }
+
+                        if (i < 5) {
+                            query = query + ", ";
+                        } else {
+                            query = query + ");";
+                        }
+                    }
+
+                    // Send the query off
+                    queryType = 3;
+                    System.out.println(query);
+                    try {
+                        SQLQuery.statementMaker(DB_URL, USER, PASS, query, 3);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                            | UnsupportedLookAndFeelException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    optionsFrame.dispose();
+                    loginSetter();
+                });
+            }
+
+            case 3 -> {
                 JLabel condition = new JLabel("Enter the column to base your condition off of:");
                 JLabel stringOrInt = new JLabel("Is it a string or an integer?");
                 JLabel comparisonTypeLabel = new JLabel("Enter comparison type (use '=' for string):");
@@ -326,11 +456,20 @@ public class DBActionOptions {
 
                 });
 
-                // send instructions to login panel
-                executeQueryButton.addActionListener(e -> {
+                 // send instructions to login panel
+                 executeQueryButton.addActionListener(e -> {
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
-                    query = "DELETE FROM " + enterTable.getText() + " WHERE " + columnBox.getSelectedItem().toString() + " " + comparisonTypesCB.getSelectedItem().toString() + " " + textField.getText() + ";";
+                    query = "DELETE FROM " + enterTable.getText() + " WHERE " + columnBox.getSelectedItem().toString() + " " + comparisonTypesCB.getSelectedItem().toString() + " ";
+                    
+                    if ("String".equals(strIntCB.getSelectedItem().toString())) {
+                        query = query + "\"" + textField.getText() + "\"" + ";";
+                    }
+                    else {
+                        query = query + textField.getText() + ";";
+                    }
+                    
+                    
                     System.out.println(query);
                     queryType = 3;
                     try {
@@ -343,15 +482,6 @@ public class DBActionOptions {
                     optionsFrame.dispose();
                     loginSetter();
                 });
-
-            }
-
-            case 2 -> {
-
-            }
-
-            case 1 -> {
-
             }
         }
     }
@@ -593,20 +723,36 @@ public class DBActionOptions {
     }
 
     public static String[] columnsGetter(String tableName) throws SQLException {
-        
+
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
                 Statement statement = conn.createStatement();) {
             ResultSet getColQuery = statement.executeQuery("SELECT * FROM " + tableName + ";");
             ResultSetMetaData metaData = getColQuery.getMetaData();
             System.out.println(tableName);
             for (int i = 1; i < 7; i++) {
-                columnNames[i-1] = metaData.getColumnName(i);
-                System.out.println(columnNames[i-1]);
+                columnNames[i - 1] = metaData.getColumnName(i);
+                columnNameTypes[i - 1] = metaData.getColumnTypeName(i);
+                System.out.println(columnNames[i - 1]);
             }
 
         } catch (Exception e) {
 
         }
         return columnNames;
+    }
+
+    @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
+    public static String typeCheck(String value) {
+        try {
+            Integer.parseInt(value);
+            return "Integer";
+        } catch (NumberFormatException e1) {
+            try {
+                Double.parseDouble(value);
+                return "Double";
+            } catch (NumberFormatException e2) {
+                return "String";
+            }
+        }
     }
 }
