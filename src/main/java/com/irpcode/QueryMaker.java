@@ -18,11 +18,7 @@ public class QueryMaker {
     static boolean DBFlag = false;
 
     public static void main(String[] args) throws IOException, InstantiationException, UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InterruptedException {
-
-        //getUserInfo();
-
         LoginPanel.loginDBPanel(DBFlag, null, -1);
-        //DBActionOptions.optionPanel(0);
     }
 
     public static void getUserInfo() throws InstantiationException, ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException {

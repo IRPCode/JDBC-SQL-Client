@@ -30,15 +30,19 @@ public class DBActionOptions {
     private static String explanationString, explanationString2, query, USER, PASS, DB_URL, textFieldText;
     private static JButton cancelButton;
     private static JSeparator buttonSeparator, buttonSeparator1;
+    @SuppressWarnings("unused")
     private static boolean loginSuccess = false;
-    private static int queryType, DBEditorType;
-    private static String dataTypes[] = { "CHAR(255)", "VARCHAR(100)", "BINARY(1)", "VARBINARY(25)", "MEDIUMTEXT",
+    private static int queryType;
+    private static final String dataTypes[] = { "CHAR(255)", "VARCHAR(100)", "BINARY(1)", "VARBINARY(25)", "MEDIUMTEXT",
             "MEDIUMBLOB", "LONGTEXT", "LONGBLOB", "BIT(1)", "BOOL", "INT(255)", "DOUBLE(10,2)" };
-    private static String strInt[] = { "String", "Int" };
-    private static String comparisonTypes[] = { "=", "<", ">" };
-    private static String columnNames[] = new String[6];
-    private static String columnNameTypes[] = new String[6];
+    private static final String strInt[] = { "String", "Int" };
+    private static final String comparisonTypes[] = { "=", "<", ">" };
+    private static final String columnNames[] = new String[6];
+    private static final String columnNameTypes[] = new String[6];
     private static JButton getColumns;
+    private static int colSetter;
+    private static JComboBox conditionColumn, conditionComparison;
+    private static JTextField conditionTextbox;
 
     public static void optionPanel(int selectedAction) throws IOException, InstantiationException,
             ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
@@ -57,7 +61,9 @@ public class DBActionOptions {
 
     public static void updateData() {
         try {
-            baseOptionsPanel(500, 300);
+            baseOptionsPanel(500, 830);
+            dataEditorSetup("This section will allow you to update existing info in a table",
+                    "Enter the table you wish to change entries in:", 1, "Update");
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
@@ -252,7 +258,185 @@ public class DBActionOptions {
 
         switch (type) {
             case 1 -> {
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
 
+                GroupLayout.ParallelGroup hGroup = optionsLayout.createParallelGroup(); // Horizontal layout
+                GroupLayout.SequentialGroup pGroup = optionsLayout.createSequentialGroup(); // Vertical layout
+
+                final GroupLayout.ParallelGroup finalHGroup = hGroup;
+                final GroupLayout.SequentialGroup finalPGroup = pGroup;
+                JLabel numberofColumnsLabel = new JLabel("Enter the number of columns you wish to update:");
+                JLabel typeWarning = new JLabel(
+                        "<html><b>WARNING: If you are inputting string data types, put your entry inside quotes (\"\")!</html></b>");
+                JComboBox<Integer> numberBox = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6 });
+                numberBox.setMaximumSize(new Dimension(40, 25));
+                textField.setMaximumSize(new Dimension(10, 25));
+                JComboBox[] columnNameBox = new JComboBox[6];
+                JTextField[] dataFields = new JTextField[6];
+                JButton getColumns = new JButton("Get Columns!");
+
+                hGroup.addComponent(explanationLabel, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(numberofColumnsLabel, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(numberBox, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(explanationLabel2, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(textField, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(getColumns, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(buttonSeparator, GroupLayout.Alignment.CENTER);
+                hGroup.addComponent(cancelButton, GroupLayout.Alignment.CENTER);
+                pGroup.addComponent(explanationLabel);
+                pGroup.addComponent(numberofColumnsLabel);
+                pGroup.addComponent(numberBox);
+                pGroup.addComponent(explanationLabel2);
+                pGroup.addComponent(textField);
+                pGroup.addComponent(getColumns);
+                pGroup.addComponent(buttonSeparator);
+                pGroup.addComponent(cancelButton);
+
+                optionsLayout.setHorizontalGroup(hGroup);
+                optionsLayout.setVerticalGroup(pGroup);
+
+                // Set the layout to the frame
+                optionsFrame.getContentPane().setLayout(optionsLayout);
+
+                getColumns.addActionListener((ActionEvent e) -> {
+
+                    JSeparator conditionSeparator = new JSeparator();
+                    JLabel conditionLabel = new JLabel("Enter your condition clause:");
+                    conditionTextbox = new JTextField();
+                    JLabel comparisonLabel = new JLabel("Enter your comparison clause:");
+                    conditionComparison = new JComboBox<>(comparisonTypes);
+                    JLabel conditionColumnLabel = new JLabel("Enter the column the condition is for:");
+
+                    colSetter = numberBox.getSelectedIndex() + 1;
+
+                    optionsFrame.getContentPane().removeAll();
+                    String columns[] = new String[6];
+
+                    try {
+                        columnsGetter(textField.getText());
+                    } catch (SQLException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+
+                    conditionColumn = new JComboBox<>(columnNames);
+                    conditionColumn.setMaximumSize(new Dimension(500, 25));
+
+                    for (int i = 0; i < 6; i++) {
+                        columns[i] = columnNameTypes[i] + " - " + columnNames[i];
+                    }
+
+                    for (int i = 0; i < colSetter; i++) {
+                        columnNameBox[i] = new JComboBox(columns);
+                        dataFields[i] = new JTextField();
+                    }
+
+                    hGroup.addComponent(explanationLabel, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(numberofColumnsLabel, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(numberBox, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(explanationLabel2, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(textField, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(getColumns, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(buttonSeparator, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(typeWarning, GroupLayout.Alignment.CENTER);
+
+                    for (int i = 0; i < colSetter; i++) {
+                        hGroup.addComponent(columnNameBox[i], GroupLayout.Alignment.CENTER);
+                        hGroup.addComponent(dataFields[i], GroupLayout.Alignment.CENTER);
+                        columnNameBox[i].setMaximumSize(new Dimension(500, 25));
+                        dataFields[i].setMaximumSize(new Dimension(500, 25));
+                    }
+
+                    hGroup.addComponent(conditionSeparator, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(conditionColumnLabel, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(conditionColumn, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(comparisonLabel, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(conditionComparison, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(conditionLabel, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(conditionTextbox, GroupLayout.Alignment.CENTER);
+
+                    hGroup.addComponent(buttonSeparator1, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(executeQueryButton, GroupLayout.Alignment.CENTER);
+                    hGroup.addComponent(cancelButton, GroupLayout.Alignment.CENTER);
+
+                    pGroup.addComponent(explanationLabel);
+                    pGroup.addComponent(numberofColumnsLabel);
+                    pGroup.addComponent(numberBox);
+                    pGroup.addComponent(explanationLabel2);
+                    pGroup.addComponent(textField);
+                    pGroup.addComponent(getColumns);
+                    pGroup.addComponent(buttonSeparator);
+                    pGroup.addComponent(typeWarning);
+
+                    for (int i = 0; i < colSetter; i++) {
+                        pGroup.addComponent(columnNameBox[i]);
+                        pGroup.addComponent(dataFields[i]);
+                    }
+
+                    conditionTextbox.setMaximumSize(new Dimension(500, 25));
+                    conditionComparison.setMaximumSize(new Dimension(500, 25));
+
+                    pGroup.addComponent(conditionSeparator);
+                    pGroup.addComponent(conditionColumnLabel);
+                    pGroup.addComponent(conditionColumn);
+                    pGroup.addComponent(comparisonLabel);
+                    pGroup.addComponent(conditionComparison);
+                    pGroup.addComponent(conditionLabel);
+                    pGroup.addComponent(conditionTextbox);
+
+                    pGroup.addComponent(buttonSeparator1);
+                    pGroup.addComponent(executeQueryButton);
+                    pGroup.addComponent(cancelButton);
+
+                    // Add the Parallel Groups to Sequential Groups for layout
+                    optionsLayout.setHorizontalGroup(hGroup);
+                    optionsLayout.setVerticalGroup(pGroup);
+
+                    /*
+                     * for (int i = 0; i < colSetter; i++) {
+                     * columnNameBox[i].addItem(new ) columns[i]; // columnNames[i]
+                     * }
+                     */
+
+                    optionsFrame.getContentPane().setLayout(optionsLayout);
+                    optionsFrame.repaint();
+
+                });
+
+                executeQueryButton.addActionListener(e -> {
+
+                    // Build the Query
+                    query = "UPDATE " + textField.getText() + " SET "; //check if space in query can be deleted after 'SET'
+                    for (int i = 0; i < colSetter; i++) {
+
+                        if (i < (colSetter - 1)) {
+                            columnNames[i] = columnNames[i] + " = " + dataFields[i].getText();
+                            query = query + columnNames[i] + ", ";
+                        }
+                        
+                        if (i == (colSetter - 1)) {
+                            query = query + " " + columnNames[i] + " = " + dataFields[i].getText() + " WHERE "
+                                    + conditionColumn.getSelectedItem().toString() + " "
+                                    + conditionComparison.getSelectedItem().toString() + " "
+                                    + conditionTextbox.getText() + ";"; // conditionColumn (=, >, <, ) condition;
+                        }
+                    }
+
+                    // Send the query off
+                    queryType = 3;
+                    System.out.println(query);
+                    try {
+                        SQLQuery.statementMaker(DB_URL, USER, PASS, query, 3);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                            | UnsupportedLookAndFeelException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    optionsFrame.dispose();
+                    loginSetter();
+                });
             }
 
             case 2 -> {
@@ -352,7 +536,7 @@ public class DBActionOptions {
                             query = query + "\"" + dataFields[i].getText() + "\"";
                         }
 
-                        else{
+                        else {
                             query = query + dataFields[i].getText();
                         }
 
@@ -456,20 +640,19 @@ public class DBActionOptions {
 
                 });
 
-                 // send instructions to login panel
-                 executeQueryButton.addActionListener(e -> {
+                // send instructions to login panel
+                executeQueryButton.addActionListener(e -> {
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
-                    query = "DELETE FROM " + enterTable.getText() + " WHERE " + columnBox.getSelectedItem().toString() + " " + comparisonTypesCB.getSelectedItem().toString() + " ";
-                    
+                    query = "DELETE FROM " + enterTable.getText() + " WHERE " + columnBox.getSelectedItem().toString()
+                            + " " + comparisonTypesCB.getSelectedItem().toString() + " ";
+
                     if ("String".equals(strIntCB.getSelectedItem().toString())) {
                         query = query + "\"" + textField.getText() + "\"" + ";";
-                    }
-                    else {
+                    } else {
                         query = query + textField.getText() + ";";
                     }
-                    
-                    
+
                     System.out.println(query);
                     queryType = 3;
                     try {
