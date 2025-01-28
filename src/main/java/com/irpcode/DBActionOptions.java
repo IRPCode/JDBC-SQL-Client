@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -41,8 +42,9 @@ public class DBActionOptions {
     private static final String columnNameTypes[] = new String[6];
     private static JButton getColumns;
     private static int colSetter;
-    private static JComboBox conditionColumn, conditionComparison;
+    private static JComboBox conditionColumn, conditionComparison, columnComboBox;
     private static JTextField conditionTextbox;
+    private static ArrayList<String> DBs;
 
     public static void optionPanel(int selectedAction) throws IOException, InstantiationException,
             ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
@@ -110,7 +112,9 @@ public class DBActionOptions {
     public static void editTable() { // Tell the user the app only supports 6 columns, and this is where to modify
                                      // columns (prevent adding and dropping)
         try {
-            baseOptionsPanel(500, 300);
+            baseOptionsPanel(500, 315);
+            tableEditorSetup("WARNING: string/numeric types must match!",
+                    "Select the table you wish to modify: ", 2, "Modify!");
         } catch (Exception e) {
             optionsFrame.dispose();
             System.out.println("Fatal Error");
@@ -134,7 +138,17 @@ public class DBActionOptions {
 
     public static void changeDatabase() throws IOException, InstantiationException, ClassNotFoundException,
             IllegalAccessException, UnsupportedLookAndFeelException {
-
+        explanationString = "Select the database you wish to swap to.";
+        explanationString2 = "This does not effect queries that require you to verify credentials.";
+        try {
+            baseOptionsPanel(500, 300);
+            DBEditorSetup(explanationString, explanationString2, 1);
+        } catch (Exception e) {
+            optionsFrame.dispose();
+            System.out.println("Fatal Error");
+            e.printStackTrace();
+            crashError(null);
+        }
     }
 
     public static void createDatabase() throws IOException, InstantiationException, ClassNotFoundException,
@@ -408,14 +422,15 @@ public class DBActionOptions {
                 executeQueryButton.addActionListener(e -> {
 
                     // Build the Query
-                    query = "UPDATE " + textField.getText() + " SET "; //check if space in query can be deleted after 'SET'
+                    query = "UPDATE " + textField.getText() + " SET "; // check if space in query can be deleted after
+                                                                       // 'SET'
                     for (int i = 0; i < colSetter; i++) {
 
                         if (i < (colSetter - 1)) {
                             columnNames[i] = columnNames[i] + " = " + dataFields[i].getText();
                             query = query + columnNames[i] + ", ";
                         }
-                        
+
                         if (i == (colSetter - 1)) {
                             query = query + " " + columnNames[i] + " = " + dataFields[i].getText() + " WHERE "
                                     + conditionColumn.getSelectedItem().toString() + " "
@@ -669,6 +684,7 @@ public class DBActionOptions {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void tableEditorSetup(String labelText, String labelText2, int type, String executeText) {
         boolean DBFlag = true;
         explanationLabel = new JLabel(labelText);
@@ -728,6 +744,81 @@ public class DBActionOptions {
 
             }
             case 2 -> {
+                JComboBox columnComboBoxSelector = new JComboBox<>();
+                JComboBox columnDataTypeSelector = new JComboBox<>(dataTypes);
+                JButton selectTableButton = new JButton("Select Table");
+                JLabel columnSelectLabel = new JLabel("Select a column");
+                JLabel dataTypeLabel = new JLabel("Select a data type to change to:");
+                JSeparator tableSeparator = new JSeparator();
+
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
+
+                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTableButton)
+                        .addComponent(tableSeparator)
+                        .addComponent(columnSelectLabel)
+                        .addComponent(columnComboBoxSelector)
+                        .addComponent(dataTypeLabel)
+                        .addComponent(columnDataTypeSelector)
+
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+
+                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTableButton)
+                        .addComponent(tableSeparator)
+                        .addComponent(columnSelectLabel)
+                        .addComponent(columnComboBoxSelector)
+                        .addComponent(dataTypeLabel)
+                        .addComponent(columnDataTypeSelector)
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+                optionsFrame.setLayout(optionsLayout);
+
+                selectTableButton.addActionListener(e -> {
+                    try {
+                        columnsGetter(textField.getText());
+                        String[] totalColumnNames = new String[6];
+                        for (int i = 0; i < 6; i++) {
+                            totalColumnNames[i] = columnNameTypes[i] + " - " + columnNames[i];
+                        }
+                        columnComboBoxSelector.setModel(new DefaultComboBoxModel<>(totalColumnNames));
+                        optionsFrame.repaint();
+                    } catch (SQLException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                });
+
+                executeQueryButton.addActionListener(e -> {
+                    int index = columnComboBoxSelector.getSelectedIndex();
+                    query = "ALTER TABLE " + textField.getText() + " MODIFY COLUMN " + columnNames[index] + " "
+                            + columnDataTypeSelector.getSelectedItem() + ";";
+
+                    System.out.println(query);
+
+                    try {
+                        queryType = 3;
+                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                            | UnsupportedLookAndFeelException | InterruptedException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                });
+
             }
             case 1 -> {
                 GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
@@ -819,7 +910,8 @@ public class DBActionOptions {
 
     }
 
-    public static void DBEditorSetup(String labelText, String labelText2, int type) {
+    public static void DBEditorSetup(String labelText, String labelText2, int type) throws InstantiationException,
+            ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException {
         boolean DBFlag = true;
         explanationLabel = new JLabel(labelText);
         explanationLabel2 = new JLabel(labelText2);
@@ -828,16 +920,62 @@ public class DBActionOptions {
         JButton verifyCredentials = new JButton("Verify Credentials");
         cancelButton = new JButton("Cancel");
 
+        GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+        optionsLayout.setAutoCreateGaps(true);
+        optionsLayout.setAutoCreateContainerGaps(true);
+
+        GroupLayout.ParallelGroup hGroup = optionsLayout.createParallelGroup();
+        GroupLayout.SequentialGroup pGroup = optionsLayout.createSequentialGroup();
+
+        hGroup.addComponent(explanationLabel, GroupLayout.Alignment.CENTER);
+        hGroup.addComponent(explanationLabel2, GroupLayout.Alignment.CENTER);
+
+        pGroup.addComponent(explanationLabel);
+        pGroup.addComponent(explanationLabel2);
+
+        if (type == 1) {
+            verifyCredentials.setText("Change DB");
+            SQLQuery.statementMaker(DB_URL, USER, PASS, "Show Databases", 2);
+            String[] DatabaseList = new String[DBs.size()];
+            for (int i = 0; i < DatabaseList.length; i++) {
+                DatabaseList[i] = DBs.get(i);
+            }
+            columnComboBox = new JComboBox(DatabaseList);
+            columnComboBox.setMaximumSize(new Dimension(500, 25));
+            hGroup.addComponent(columnComboBox, GroupLayout.Alignment.CENTER);
+            pGroup.addComponent(columnComboBox);
+
+        } else {
+            hGroup.addComponent(textField, GroupLayout.Alignment.CENTER, GroupLayout.PREFERRED_SIZE, 300,
+                    GroupLayout.PREFERRED_SIZE);
+            pGroup.addComponent(textField);
+            textField.setMaximumSize(new Dimension(500, 25));
+        }
+
+        hGroup.addComponent(buttonSeparator, GroupLayout.Alignment.CENTER);
+        pGroup.addComponent(buttonSeparator);
+
+        hGroup.addComponent(verifyCredentials, GroupLayout.Alignment.CENTER);
+        hGroup.addComponent(cancelButton, GroupLayout.Alignment.CENTER);
+        pGroup.addComponent(verifyCredentials);
+        pGroup.addComponent(cancelButton);
+
+        optionsLayout.setHorizontalGroup(hGroup);
+        optionsLayout.setVerticalGroup(pGroup);
+
+        optionsFrame.setLayout(optionsLayout);
+        optionsFrame.setVisible(true);
+
         cancelButton.addActionListener(e -> {
             optionsFrame.dispose();
         });
 
         verifyCredentials.addActionListener(e -> {
             try {
-
-                if (!textField.getText().equals("") && type == 1) {
-                    // add functionality to this after you make your select statement for swapping
-                    // DBs
+                String changedURL = "jdbc:mysql://localhost:3306/" + columnComboBox.getSelectedItem().toString();
+                if (type == 1) {
+                    UIMaker.credentialsMainPanelSetter(changedURL, null, null, DBFlag);
+                    DB_URL = changedURL;
                 }
 
                 else if (!textField.getText().equals("") && type == 2) {
@@ -867,32 +1005,6 @@ public class DBActionOptions {
             }
             loginSetter();
         });
-
-        GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
-        optionsLayout.setAutoCreateGaps(true);
-        optionsLayout.setAutoCreateContainerGaps(true);
-
-        optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                .addComponent(explanationLabel)
-                .addComponent(explanationLabel2)
-                .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
-                        GroupLayout.PREFERRED_SIZE)
-                .addComponent(buttonSeparator)
-                .addComponent(verifyCredentials)
-                .addComponent(cancelButton));
-
-        optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
-                .addComponent(explanationLabel)
-                .addComponent(explanationLabel2)
-                .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(buttonSeparator)
-                .addComponent(verifyCredentials)
-                .addComponent(cancelButton));
-
-        optionsFrame.setLayout(optionsLayout);
-        optionsFrame.setVisible(true);
     }
 
     public static void loginSetter() {
@@ -926,6 +1038,7 @@ public class DBActionOptions {
 
     @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
     public static String typeCheck(String value) {
+
         try {
             Integer.parseInt(value);
             return "Integer";
@@ -937,5 +1050,9 @@ public class DBActionOptions {
                 return "String";
             }
         }
+    }
+
+    static void DBSetter(ArrayList<String> DBs1) {
+        DBs = DBs1;
     }
 }

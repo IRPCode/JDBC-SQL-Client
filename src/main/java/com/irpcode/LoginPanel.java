@@ -154,6 +154,7 @@ public abstract class LoginPanel implements ActionListener {
             } else {
                 UIMaker.setupUI(null);
                 DBActionOptions.credentialsSetter(DB_URL, USER, PASS);
+                UIMaker.credentialsMainPanelSetter(DB_URL, USER, PASS, false);
             }
 
         } catch (Exception e) {

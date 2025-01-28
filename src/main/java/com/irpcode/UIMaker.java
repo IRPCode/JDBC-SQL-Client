@@ -32,7 +32,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
     static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private static JButton exitButton, openPanel;
     static JFrame frame;
-  
+    private static String DB_URL, USER, PASS;
 
     public static void setupUI(ResultSet results) throws IOException, InstantiationException,
             UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, SQLException {
@@ -72,9 +72,10 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         exitLayout.setVerticalGroup(exitLayout.createSequentialGroup()
                 .addGroup(exitLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(appLabel)
-                        .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, 15,GroupLayout.PREFERRED_SIZE))
+                        .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED) // Space between components
-                .addComponent(topLine, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+                .addComponent(topLine, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE));
 
         String[] DBActionsArray = { "Update Data", "Insert Data", "Delete Data", "Create Table",
                 "Edit Table", "Delete Table", "Change Database", "Create Database", "Delete Database" };
@@ -83,7 +84,8 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         openPanel.addActionListener(e -> {
             try {
                 openPanelOptionsChooser(DBActionsList);
-            } catch (IOException | InstantiationException | ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            } catch (IOException | InstantiationException | ClassNotFoundException | IllegalAccessException
+                    | UnsupportedLookAndFeelException ex) {
             }
         });
 
@@ -131,20 +133,31 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         }
 
         frame.setIconImage(icon);
-        //System.out.println(icon);
+        // System.out.println(icon);
     }
 
-    public static void openPanelOptionsChooser(@SuppressWarnings("rawtypes") JList DBActionsList) throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
+    public static void openPanelOptionsChooser(@SuppressWarnings("rawtypes") JList DBActionsList) throws IOException,
+            InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
         int selectedAction = DBActionsList.getSelectedIndex();
         System.out.println(selectedAction);
-        if (selectedAction > -1){
+        if (selectedAction > -1) {
             openPanel.setText("Open Query Options");
             DBActionOptions.optionPanel(selectedAction);
-        }
-        else{
+        } else {
             openPanel.setText("Select An Option");
         }
-        
+
+    }
+
+    public static void credentialsMainPanelSetter(String url, String username, String password, boolean flag) {
+        if (flag == true) {
+            DB_URL = url;
+        } else {
+            DB_URL = url;
+            USER = username;
+            PASS = password;
+        }
+        System.out.println("");
     }
 
 }
