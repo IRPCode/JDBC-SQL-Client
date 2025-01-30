@@ -1020,7 +1020,7 @@ public class DBActionOptions {
     public static String[] columnsGetter(String tableName) throws SQLException {
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                Statement statement = conn.createStatement();) {
+            Statement statement = conn.createStatement();) {
             ResultSet getColQuery = statement.executeQuery("SELECT * FROM " + tableName + ";");
             ResultSetMetaData metaData = getColQuery.getMetaData();
             System.out.println(tableName);

@@ -23,8 +23,11 @@ public class SQLQuery {
     public static String[] returnedData;
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public static void statementMaker(String DB_URL, String USER, String PASS, String query, int queryType) throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS); Statement statement = conn.createStatement();) {
+    public static void statementMaker(String DB_URL, String USER, String PASS, String query, int queryType)
+            throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException,
+            UnsupportedLookAndFeelException {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                Statement statement = conn.createStatement();) {
             ResultSet results = null;
             boolean resultsExecuted = false;
             @SuppressWarnings("unused")
@@ -35,11 +38,11 @@ public class SQLQuery {
                     results = statement.executeQuery(query);
                     metaData = results.getMetaData();
                 }
-                case 2 -> { //only for getting databases
+                case 2 -> { // only for getting databases
                     ArrayList<String> DBs = new ArrayList<>();
                     results = statement.executeQuery(query);
-                    
-                    while (results.next()){
+
+                    while (results.next()) {
                         DBs.add(results.getString(1));
                     }
                     System.out.println(DBs);
@@ -50,16 +53,20 @@ public class SQLQuery {
                     System.out.println(resultsExecuted);
 
                 }
+                case 4 -> { // for getting results on the main panel in UIMaker
+                    results = statement.executeQuery(query);
+                    metaData = results.getMetaData();
+                }
             }
-         
-            //QueryMaker.printQueryResults(results, metaData, resultsUpdated, resultsExecuted);
+
+            // QueryMaker.printQueryResults(results, metaData, resultsUpdated,
+            // resultsExecuted);
         } catch (Exception e) {
             e.printStackTrace();
-            if (e.getMessage().contains("database doesn't exist")){
+            if (e.getMessage().contains("database doesn't exist")) {
                 String errorMessage = "Database doesn't exist";
                 DBActionOptions.crashError(errorMessage);
             }
         }
     }
-
 }
