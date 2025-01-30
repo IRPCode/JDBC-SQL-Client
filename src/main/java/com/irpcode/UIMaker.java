@@ -16,8 +16,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -32,6 +36,7 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.Border;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -44,20 +49,19 @@ public abstract class UIMaker extends JFrame implements ActionListener {
     private static String DB_URL, USER, PASS, tableName;
     private static final String columnNames[] = new String[6];
     private static final String columnNameTypes[] = new String[6];
+    private static Map<Integer, String> DBResults;
+    private static int pageNumber = 1;
+    private static int pageResults = 0;
 
     public static void setupUI(ResultSet results) throws IOException, InstantiationException,
             UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, SQLException {
 
-        String foundType = "";
-
         frame = new JFrame("JDBC SQL Client");
 
         frameStyle(frame);
-        // frame.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         frame.setSize(1250, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        // frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel topPanel = new JPanel();
         GroupLayout exitLayout = new GroupLayout(topPanel);
@@ -112,9 +116,6 @@ public abstract class UIMaker extends JFrame implements ActionListener {
 
         // right panel objects
 
-        tableName = "userInfo";
-        getDBData(DB_URL, USER, PASS, ("SELECT * FROM " + tableName + ";"));
-
         GridBagConstraints returnedDataConstraint = new GridBagConstraints();
         returnedDataConstraint.insets = new Insets(5, 5, 5, 5);
         returnedDataConstraint.fill = GridBagConstraints.HORIZONTAL;
@@ -124,13 +125,14 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         JTextField specifyQuery = new JTextField();
         JComboBox specifyColumn = new JComboBox<>(columnNames);
         JButton search = new JButton("⌕");
+        JLabel pageLabel = new JLabel("Page: 1");
 
         JButton previous = new JButton("←");
         JButton next = new JButton("→");
 
         JLabel specifyTable = new JLabel("Enter table:");
-        JTextField tableName = new JTextField();
-        JButton selectTable = new JButton("Select Table!");
+        JTextField tableNameField = new JTextField();
+        JButton selectTable = new JButton("Select Table/Show All");
 
         returnedDataConstraint.gridx = 0 % 6; // Column
         returnedDataConstraint.gridy = 0 / 6; // Row
@@ -138,7 +140,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
 
         returnedDataConstraint.gridx = 1 % 6; // Column
         returnedDataConstraint.gridy = 1 / 6; // Row
-        rightPanel.add(tableName, returnedDataConstraint);
+        rightPanel.add(tableNameField, returnedDataConstraint);
 
         returnedDataConstraint.gridx = 2 % 6; // Column
         returnedDataConstraint.gridy = 2 / 6; // Row
@@ -183,13 +185,92 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         next.setBackground(Color.decode("#456b98"));
         rightPanel.add(next, returnedDataConstraint);
 
+        returnedDataConstraint.gridx = 84 % 6; // Column
+        returnedDataConstraint.gridy = 84 / 6; // Row
+        rightPanel.add(pageLabel, returnedDataConstraint);
+
+        // right panel button functions
+
+        next.addActionListener(e -> { // next button
+            if (DBResults != null) {
+                pageNumber = pageNumber + 1;
+                pageResults = pageResults + 60;
+                pageLabel.setText("Page: " + pageNumber);
+                for (int i = 0; i < 60; i++) {
+                    SQLReturnedData[i].setText(DBResults.get(i + pageResults));
+                }
+                rightPanel.repaint();
+            }
+        });
+
+        previous.addActionListener(e -> { // previous button
+            if (pageNumber > 1 && DBResults != null) {
+                pageNumber = pageNumber - 1;
+                pageResults = pageResults - 60;
+                pageLabel.setText("Page: " + pageNumber);
+                for (int i = 0; i < 60; i++) {
+                    SQLReturnedData[i].setText(DBResults.get(i + pageResults));
+                }
+                rightPanel.repaint();
+            }
+        });
+
+        search.addActionListener(e -> { // search button functions
+            String specifyColumnText = specifyColumn.getSelectedItem().toString();
+            String customQuery = specifyQuery.getText();
+            for (int i = 0; i < 60; i++) {
+                SQLReturnedData[i].setText(DBResults.get(i));
+            }
+            try {
+                getDBData(DB_URL, USER, PASS,
+                        ("SELECT * FROM " + tableName + " WHERE " + specifyColumnText + " = " + customQuery + ";"));
+            } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                    | UnsupportedLookAndFeelException | SQLException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            rightPanel.repaint();
+        });
+
+        selectTable.addActionListener(e -> { // selects table or shows all returned items from select query
+            tableName = tableNameField.getText();
+            try {
+                getDBData(DB_URL, USER, PASS, ("SELECT * FROM " + tableName + ";"));
+            } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                    | UnsupportedLookAndFeelException | SQLException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+
+            for (int i = 0; i < 6; i++) {
+                if (i < 6) {
+                    columnName[i].setText(columnNameTypes[i] + " - " + columnNames[i] + ":");
+                }
+            }
+
+            if (DBResults != null) {
+                pageNumber = 1;
+                pageResults = 0;
+                pageLabel.setText("Page: " + pageNumber);
+                for (int i = 0; i < 60; i++) {
+                    SQLReturnedData[i].setText(DBResults.get(i + pageResults));
+                }
+            }
+            specifyColumn.setModel(new DefaultComboBoxModel<>(columnNames));
+            rightPanel.repaint();
+        });
+
+        // set panel up and render panel
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        splitPane.setDividerLocation(150); // Set initial divider location
-        splitPane.setOneTouchExpandable(false); // Add a little button to toggle
+        splitPane.setDividerLocation(150);
+        splitPane.setOneTouchExpandable(false);
         splitPane.setEnabled(false);
         frame.setLayout(new java.awt.BorderLayout());
         frame.add(topPanel, java.awt.BorderLayout.NORTH);
         frame.add(splitPane, java.awt.BorderLayout.CENTER);
+        Border border = BorderFactory.createLineBorder(Color.decode("#5d5f60"), 3);
+        frame.getRootPane().setBorder(border);
         frame.setVisible(true);
     }
 
@@ -221,6 +302,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         // System.out.println(icon);
     }
 
+    // send selected option to the DBActionOptions class
     public static void openPanelOptionsChooser(@SuppressWarnings("rawtypes") JList DBActionsList) throws IOException,
             InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException {
         int selectedAction = DBActionsList.getSelectedIndex();
@@ -234,6 +316,7 @@ public abstract class UIMaker extends JFrame implements ActionListener {
 
     }
 
+    // ensures that credentials are up to date
     public static void credentialsMainPanelSetter(String url, String username, String password, boolean flag) {
         if (flag == true) {
             DB_URL = url;
@@ -245,9 +328,12 @@ public abstract class UIMaker extends JFrame implements ActionListener {
         System.out.println(DB_URL + USER + PASS);
     }
 
-     public static ResultSet getDBData(String DB_URL, String USER, String PASS, String query) throws IOException,
-            InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException { //specifically for the select statement in this class
+    public static ResultSet getDBData(String DB_URL, String USER, String PASS, String query) throws IOException,
+            InstantiationException, ClassNotFoundException, IllegalAccessException, UnsupportedLookAndFeelException,
+            SQLException { // specifically for the select statement in this class, gets columns and
+                           // database information
         ResultSet results = null;
+        DBResults = new HashMap<>();
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
                 Statement statement = conn.createStatement();) {
             @SuppressWarnings("unused")
@@ -260,6 +346,15 @@ public abstract class UIMaker extends JFrame implements ActionListener {
                 columnNameTypes[i - 1] = metaData.getColumnTypeName(i);
                 System.out.println(columnNames[i - 1]);
             }
+
+            int x = 0;
+            while (results.next()) {
+                for (int i = 1; i <= 6; i++) {
+                    DBResults.put(x * 6 + i - 1, results.getString(i));
+                }
+                x++;
+            }
+            System.out.println(DBResults);
 
         } catch (Exception e) {
             e.printStackTrace();

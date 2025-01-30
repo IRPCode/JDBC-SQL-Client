@@ -60,7 +60,7 @@ public abstract class LoginPanel implements ActionListener {
         loginButton = new JButton("Login");
         loginButton.setPreferredSize(new Dimension(200, 35));
 
-        if (DBFlag == true) {
+        if (DBFlag == true) { //flag to identify if it is an initial login attempt, or if it is to verify credentials
             exitButton = new JButton("Cancel");
         } else {
             exitButton = new JButton("Exit");
@@ -79,8 +79,6 @@ public abstract class LoginPanel implements ActionListener {
         groupLayout.setAutoCreateContainerGaps(true);
 
         loginPanel.add(panel);
-
-        
 
         groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                 .addComponent(usernameLabel)
@@ -144,14 +142,14 @@ public abstract class LoginPanel implements ActionListener {
         String PASS = passwordField.getText();
         String DB_URL = BASE_URL + DBField.getText();
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) { //connects to DB
             System.out.println("Success");
             loginPanel.dispose();
-            if (DBFlag1 == true) {
+            if (DBFlag1 == true) { //runs this if the user is verifying credentials
                 SQLQuery.statementMaker(DB_URL, USER, PASS, query, queryType);
                 System.out.println(query + queryType);
                 DBFlagSetter();
-            } else {
+            } else {  //if it is the initial login attempt
                 UIMaker.credentialsMainPanelSetter(DB_URL, USER, PASS, false);
                 UIMaker.setupUI(null);
                 System.out.println(DB_URL);
@@ -172,7 +170,7 @@ public abstract class LoginPanel implements ActionListener {
 
     }
 
-    public static void DBFlagSetter() {
+    public static void DBFlagSetter() { //sets flag globally
         DBFlag = false;
     }
 }

@@ -61,6 +61,8 @@ public class DBActionOptions {
         }
     }
 
+    //next ten methods are to change variable values and set up panels
+
     public static void updateData() {
         try {
             baseOptionsPanel(500, 830);
@@ -254,6 +256,7 @@ public class DBActionOptions {
 
     }
 
+    //for all instances where the user would be editing the data inside of the DB
     public static void dataEditorSetup(String labelText, String labelText2, int type, String executeText) {
         boolean DBFlag = true;
         explanationLabel = new JLabel(labelText);
@@ -271,7 +274,7 @@ public class DBActionOptions {
         });
 
         switch (type) {
-            case 1 -> {
+            case 1 -> { //for updating data
                 GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
                 optionsLayout.setAutoCreateGaps(true);
                 optionsLayout.setAutoCreateContainerGaps(true);
@@ -404,15 +407,8 @@ public class DBActionOptions {
                     pGroup.addComponent(executeQueryButton);
                     pGroup.addComponent(cancelButton);
 
-                    // Add the Parallel Groups to Sequential Groups for layout
                     optionsLayout.setHorizontalGroup(hGroup);
                     optionsLayout.setVerticalGroup(pGroup);
-
-                    /*
-                     * for (int i = 0; i < colSetter; i++) {
-                     * columnNameBox[i].addItem(new ) columns[i]; // columnNames[i]
-                     * }
-                     */
 
                     optionsFrame.getContentPane().setLayout(optionsLayout);
                     optionsFrame.repaint();
@@ -422,8 +418,7 @@ public class DBActionOptions {
                 executeQueryButton.addActionListener(e -> {
 
                     // Build the Query
-                    query = "UPDATE " + textField.getText() + " SET "; // check if space in query can be deleted after
-                                                                       // 'SET'
+                    query = "UPDATE " + textField.getText() + " SET "; 
                     for (int i = 0; i < colSetter; i++) {
 
                         if (i < (colSetter - 1)) {
@@ -454,7 +449,7 @@ public class DBActionOptions {
                 });
             }
 
-            case 2 -> {
+            case 2 -> { //for inserting data in the database
                 GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
                 optionsLayout.setAutoCreateGaps(true);
                 optionsLayout.setAutoCreateContainerGaps(true);
@@ -502,11 +497,10 @@ public class DBActionOptions {
                 pGroup.addComponent(executeQueryButton);
                 pGroup.addComponent(cancelButton);
 
-                // Add the Parallel Groups to Sequential Groups for layout
                 optionsLayout.setHorizontalGroup(hGroup);
                 optionsLayout.setVerticalGroup(pGroup);
 
-                // Set the layout to the frame
+
                 optionsFrame.getContentPane().setLayout(optionsLayout);
 
                 getColumns.addActionListener((ActionEvent e) -> {
@@ -577,7 +571,7 @@ public class DBActionOptions {
                 });
             }
 
-            case 3 -> {
+            case 3 -> { //for deleting information
                 JLabel condition = new JLabel("Enter the column to base your condition off of:");
                 JLabel stringOrInt = new JLabel("Is it a string or an integer?");
                 JLabel comparisonTypeLabel = new JLabel("Enter comparison type (use '=' for string):");
@@ -684,6 +678,7 @@ public class DBActionOptions {
         }
     }
 
+    //for editing the tables themselves
     @SuppressWarnings("unchecked")
     public static void tableEditorSetup(String labelText, String labelText2, int type, String executeText) {
         boolean DBFlag = true;
@@ -700,127 +695,7 @@ public class DBActionOptions {
         });
 
         switch (type) {
-            case 3 -> {
-                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
-                optionsLayout.setAutoCreateGaps(true);
-                optionsLayout.setAutoCreateContainerGaps(true);
-
-                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                        .addComponent(explanationLabel)
-                        .addComponent(explanationLabel2)
-                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addComponent(buttonSeparator)
-                        .addComponent(executeQueryButton)
-                        .addComponent(cancelButton));
-
-                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
-                        .addComponent(explanationLabel)
-                        .addComponent(explanationLabel2)
-                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(buttonSeparator)
-                        .addComponent(executeQueryButton)
-                        .addComponent(cancelButton));
-                optionsFrame.setLayout(optionsLayout);
-
-                // send instructions to login panel
-                executeQueryButton.addActionListener(e -> {
-                    textFieldText = textField.getText();
-                    textFieldText = textField.getText();
-                    query = "DROP TABLE " + textFieldText + ";";
-                    queryType = 3;
-                    try {
-                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
-                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException
-                            | IOException | UnsupportedLookAndFeelException | InterruptedException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                    optionsFrame.dispose();
-                    loginSetter();
-                });
-
-            }
-            case 2 -> {
-                JComboBox columnComboBoxSelector = new JComboBox<>();
-                JComboBox columnDataTypeSelector = new JComboBox<>(dataTypes);
-                JButton selectTableButton = new JButton("Select Table");
-                JLabel columnSelectLabel = new JLabel("Select a column");
-                JLabel dataTypeLabel = new JLabel("Select a data type to change to:");
-                JSeparator tableSeparator = new JSeparator();
-
-                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
-                optionsLayout.setAutoCreateGaps(true);
-                optionsLayout.setAutoCreateContainerGaps(true);
-
-                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                        .addComponent(explanationLabel)
-                        .addComponent(explanationLabel2)
-                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addComponent(selectTableButton)
-                        .addComponent(tableSeparator)
-                        .addComponent(columnSelectLabel)
-                        .addComponent(columnComboBoxSelector)
-                        .addComponent(dataTypeLabel)
-                        .addComponent(columnDataTypeSelector)
-
-                        .addComponent(buttonSeparator)
-                        .addComponent(executeQueryButton)
-                        .addComponent(cancelButton));
-
-                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
-                        .addComponent(explanationLabel)
-                        .addComponent(explanationLabel2)
-                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addComponent(selectTableButton)
-                        .addComponent(tableSeparator)
-                        .addComponent(columnSelectLabel)
-                        .addComponent(columnComboBoxSelector)
-                        .addComponent(dataTypeLabel)
-                        .addComponent(columnDataTypeSelector)
-                        .addComponent(buttonSeparator)
-                        .addComponent(executeQueryButton)
-                        .addComponent(cancelButton));
-                optionsFrame.setLayout(optionsLayout);
-
-                selectTableButton.addActionListener(e -> {
-                    try {
-                        columnsGetter(textField.getText());
-                        String[] totalColumnNames = new String[6];
-                        for (int i = 0; i < 6; i++) {
-                            totalColumnNames[i] = columnNameTypes[i] + " - " + columnNames[i];
-                        }
-                        columnComboBoxSelector.setModel(new DefaultComboBoxModel<>(totalColumnNames));
-                        optionsFrame.repaint();
-                    } catch (SQLException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                });
-
-                executeQueryButton.addActionListener(e -> {
-                    int index = columnComboBoxSelector.getSelectedIndex();
-                    query = "ALTER TABLE " + textField.getText() + " MODIFY COLUMN " + columnNames[index] + " "
-                            + columnDataTypeSelector.getSelectedItem() + ";";
-
-                    System.out.println(query);
-
-                    try {
-                        queryType = 3;
-                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
-                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
-                            | UnsupportedLookAndFeelException | InterruptedException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                });
-
-            }
-            case 1 -> {
+            case 1 -> { //creates a new table
                 GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
                 optionsLayout.setAutoCreateGaps(true);
                 optionsLayout.setAutoCreateContainerGaps(true);
@@ -904,12 +779,133 @@ public class DBActionOptions {
                 });
 
             }
+            case 2 -> { //edits an existing table
+                JComboBox columnComboBoxSelector = new JComboBox<>();
+                JComboBox columnDataTypeSelector = new JComboBox<>(dataTypes);
+                JButton selectTableButton = new JButton("Select Table");
+                JLabel columnSelectLabel = new JLabel("Select a column");
+                JLabel dataTypeLabel = new JLabel("Select a data type to change to:");
+                JSeparator tableSeparator = new JSeparator();
+
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
+
+                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTableButton)
+                        .addComponent(tableSeparator)
+                        .addComponent(columnSelectLabel)
+                        .addComponent(columnComboBoxSelector)
+                        .addComponent(dataTypeLabel)
+                        .addComponent(columnDataTypeSelector)
+
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+
+                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTableButton)
+                        .addComponent(tableSeparator)
+                        .addComponent(columnSelectLabel)
+                        .addComponent(columnComboBoxSelector)
+                        .addComponent(dataTypeLabel)
+                        .addComponent(columnDataTypeSelector)
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+                optionsFrame.setLayout(optionsLayout);
+
+                selectTableButton.addActionListener(e -> {
+                    try {
+                        columnsGetter(textField.getText());
+                        String[] totalColumnNames = new String[6];
+                        for (int i = 0; i < 6; i++) {
+                            totalColumnNames[i] = columnNameTypes[i] + " - " + columnNames[i];
+                        }
+                        columnComboBoxSelector.setModel(new DefaultComboBoxModel<>(totalColumnNames));
+                        optionsFrame.repaint();
+                    } catch (SQLException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                });
+
+                executeQueryButton.addActionListener(e -> {
+                    int index = columnComboBoxSelector.getSelectedIndex();
+                    query = "ALTER TABLE " + textField.getText() + " MODIFY COLUMN " + columnNames[index] + " "
+                            + columnDataTypeSelector.getSelectedItem() + ";";
+
+                    System.out.println(query);
+
+                    try {
+                        queryType = 3;
+                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | IOException
+                            | UnsupportedLookAndFeelException | InterruptedException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                });
+
+            }
+            case 3 -> { //deletes an existing table
+                GroupLayout optionsLayout = new GroupLayout(optionsFrame.getContentPane());
+                optionsLayout.setAutoCreateGaps(true);
+                optionsLayout.setAutoCreateContainerGaps(true);
+
+                optionsLayout.setHorizontalGroup(optionsLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, 300,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+
+                optionsLayout.setVerticalGroup(optionsLayout.createSequentialGroup()
+                        .addComponent(explanationLabel)
+                        .addComponent(explanationLabel2)
+                        .addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(buttonSeparator)
+                        .addComponent(executeQueryButton)
+                        .addComponent(cancelButton));
+                optionsFrame.setLayout(optionsLayout);
+
+                // send instructions to login panel
+                executeQueryButton.addActionListener(e -> {
+                    textFieldText = textField.getText();
+                    textFieldText = textField.getText();
+                    query = "DROP TABLE " + textFieldText + ";";
+                    queryType = 3;
+                    try {
+                        LoginPanel.loginDBPanel(DBFlag, query, queryType);
+                    } catch (InstantiationException | ClassNotFoundException | IllegalAccessException
+                            | IOException | UnsupportedLookAndFeelException | InterruptedException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    optionsFrame.dispose();
+                    loginSetter();
+                });
+
+            }
         }
 
         optionsFrame.setVisible(true);
 
     }
 
+    //for editing the database itself
     public static void DBEditorSetup(String labelText, String labelText2, int type) throws InstantiationException,
             ClassNotFoundException, IllegalAccessException, IOException, UnsupportedLookAndFeelException {
         boolean DBFlag = true;
@@ -933,7 +929,7 @@ public class DBActionOptions {
         pGroup.addComponent(explanationLabel);
         pGroup.addComponent(explanationLabel2);
 
-        if (type == 1) {
+        if (type == 1) { //checks to see if the user is attempting to change a database, sets components accordingly
             verifyCredentials.setText("Change DB");
             SQLQuery.statementMaker(DB_URL, USER, PASS, "Show Databases", 2);
             String[] DatabaseList = new String[DBs.size()];
@@ -945,7 +941,7 @@ public class DBActionOptions {
             hGroup.addComponent(columnComboBox, GroupLayout.Alignment.CENTER);
             pGroup.addComponent(columnComboBox);
 
-        } else {
+        } else { //sets it up to either create or delete a DB
             hGroup.addComponent(textField, GroupLayout.Alignment.CENTER, GroupLayout.PREFERRED_SIZE, 300,
                     GroupLayout.PREFERRED_SIZE);
             pGroup.addComponent(textField);
@@ -973,12 +969,12 @@ public class DBActionOptions {
         verifyCredentials.addActionListener(e -> {
             try {
                 String changedURL = "jdbc:mysql://localhost:3306/" + columnComboBox.getSelectedItem().toString();
-                if (type == 1) {
+                if (type == 1) { //changes DB
                     UIMaker.credentialsMainPanelSetter(changedURL, null, null, DBFlag);
                     DB_URL = changedURL;
                 }
 
-                else if (!textField.getText().equals("") && type == 2) {
+                else if (!textField.getText().equals("") && type == 2) { //cretes DB
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
                     query = "CREATE DATABASE " + textFieldText + ";";
@@ -986,7 +982,7 @@ public class DBActionOptions {
                     LoginPanel.loginDBPanel(DBFlag, query, queryType);
                     optionsFrame.dispose();
 
-                } else if (!textField.getText().equals("") && type == 3) {
+                } else if (!textField.getText().equals("") && type == 3) { //deletes DB
                     textFieldText = textField.getText();
                     textFieldText = textField.getText();
                     query = "DROP DATABASE " + textFieldText + ";";
@@ -1007,17 +1003,17 @@ public class DBActionOptions {
         });
     }
 
-    public static void loginSetter() {
+    public static void loginSetter() { //sets loginSuccess flag to lock user in/out of login sessions
         loginSuccess = false;
     }
 
-    public static void credentialsSetter(String database, String username, String password) {
+    public static void credentialsSetter(String database, String username, String password) { //ensures all credentials are synchronous
         DB_URL = database;
         USER = username;
         PASS = password;
     }
 
-    public static String[] columnsGetter(String tableName) throws SQLException {
+    public static String[] columnsGetter(String tableName) throws SQLException { //gets the names of columns
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
             Statement statement = conn.createStatement();) {
@@ -1037,7 +1033,7 @@ public class DBActionOptions {
     }
 
     @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
-    public static String typeCheck(String value) {
+    public static String typeCheck(String value) { //checks the dataTypes to ensure the program knows how to handle inputs
 
         try {
             Integer.parseInt(value);
@@ -1052,7 +1048,7 @@ public class DBActionOptions {
         }
     }
 
-    static void DBSetter(ArrayList<String> DBs1) {
+    static void DBSetter(ArrayList<String> DBs1) { //keeps DB synchronized, seperate from credentialSetter to ensure program only handles DB changing
         DBs = DBs1;
     }
 }

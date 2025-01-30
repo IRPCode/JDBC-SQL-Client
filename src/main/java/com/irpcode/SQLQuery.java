@@ -53,10 +53,6 @@ public class SQLQuery {
                     System.out.println(resultsExecuted);
 
                 }
-                case 4 -> { // for getting results on the main panel in UIMaker
-                    results = statement.executeQuery(query);
-                    metaData = results.getMetaData();
-                }
             }
 
             // QueryMaker.printQueryResults(results, metaData, resultsUpdated,
