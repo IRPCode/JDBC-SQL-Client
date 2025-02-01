@@ -27,7 +27,9 @@ Starting off, make sure you are only using a database that has up to<b> six colu
 </div>
 
 <div align="center">
+  
 ![image](https://github.com/user-attachments/assets/d8d8b090-f3f4-47a4-bd7e-fcfd593b42fd)
+
 </div>
 
 - When the program boots, you will be met with a login panel. Ensure that you enter the database that you want to use
