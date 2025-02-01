@@ -16,6 +16,7 @@ First, make sure that you have the following things installed:
     - <a href="https://www.tutorialspoint.com/maven/maven_environment_setup.htm">Make sure it is properly configured on your system</a>
   - <a href="https://www.mysql.com/downloads/">MySQL</a>
     - This program was tested using MySQL 9.1
+    - Ensure your MySQL database is running through Port 3306
 
 <div align="center">
 <h2>Getting started</h2>
