@@ -127,11 +127,12 @@ The options panel on the left side of the main panel are used to do basic modifi
 
 ![image](https://github.com/user-attachments/assets/0004d0a3-fc77-4d8f-8fc0-f48768da871e)|
 
+<h3>Modifying The Database</h3>
+
 </div>
 
 - Changing databases effects all other aspects of the program. Make sure when verifying your credentials that you enter the same table name if you want to continue to modify it.
 
-<h3>Modifying The Database</h3>
 
 <div align="center">
 
